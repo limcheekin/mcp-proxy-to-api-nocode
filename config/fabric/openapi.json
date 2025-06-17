@@ -1,0 +1,797 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Fabric Main REST API",
+    "description": "The comprehensive REST API for the danielmiessler/fabric application. It allows for interaction with various LLMs and full management of patterns, sessions, contexts, and other resources.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Daniel Miessler",
+      "url": "https://github.com/danielmiessler/fabric"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:1337",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/chat": {
+      "post": {
+        "summary": "Send a chat request",
+        "description": "The main endpoint for interacting with an LLM. It supports streaming responses.",
+        "tags": [
+          "Chat"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful streaming response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/config": {
+      "get": {
+        "summary": "Get configuration",
+        "description": "Retrieves the current server configuration.",
+        "tags": [
+          "Admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of configuration.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/config/update": {
+      "post": {
+        "summary": "Update configuration",
+        "description": "Updates the server configuration.",
+        "tags": [
+          "Admin"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Configuration updated successfully."
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/models/names": {
+      "get": {
+        "summary": "List model names",
+        "tags": [
+          "Discovery"
+        ],
+        "responses": {
+          "200": {
+            "description": "A JSON array of model names.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/names": {
+      "get": {
+        "summary": "List pattern names",
+        "tags": [
+          "Patterns"
+        ],
+        "responses": {
+          "200": {
+            "description": "A JSON array of pattern names.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patterns/{name}": {
+      "get": {
+        "summary": "Get a pattern's content",
+        "tags": [
+          "Patterns"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The content of the pattern.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create or update a pattern",
+        "description": "Creates a new pattern or updates an existing one with the given name.",
+        "tags": [
+          "Patterns"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The content of the pattern.",
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pattern created/updated successfully."
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a pattern",
+        "tags": [
+          "Patterns"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pattern deleted successfully."
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/patterns/exists/{name}": {
+      "get": {
+        "summary": "Check if a pattern exists",
+        "tags": [
+          "Patterns"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns true or false."
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/patterns/rename/{oldName}/{newName}": {
+      "put": {
+        "summary": "Rename a pattern",
+        "tags": [
+          "Patterns"
+        ],
+        "parameters": [
+          {
+            "name": "oldName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pattern renamed successfully."
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/contexts/names": {
+      "get": {
+        "summary": "List context names",
+        "tags": [
+          "Contexts"
+        ],
+        "responses": {
+          "200": {
+            "description": "A JSON array of context names.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contexts/{name}": {
+      "get": {
+        "summary": "Get a context's content",
+        "tags": [
+          "Contexts"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The content of the context."
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create or update a context",
+        "tags": [
+          "Contexts"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Context created/updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a context",
+        "tags": [
+          "Contexts"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Context deleted successfully."
+          }
+        }
+      }
+    },
+    "/contexts/exists/{name}": {
+      "get": {
+        "summary": "Check if a context exists",
+        "tags": [
+          "Contexts"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns true or false."
+          }
+        }
+      }
+    },
+    "/contexts/rename/{oldName}/{newName}": {
+      "put": {
+        "summary": "Rename a context",
+        "tags": [
+          "Contexts"
+        ],
+        "parameters": [
+          {
+            "name": "oldName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Context renamed successfully."
+          }
+        }
+      }
+    },
+    "/sessions": {
+      "post": {
+        "summary": "Create a new session",
+        "description": "Creates a new chat session and returns a server-generated ID.",
+        "tags": [
+          "Sessions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Session created successfully, returning a new session ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "session_id": {
+                      "type": "string",
+                      "description": "The newly created session ID."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/names": {
+      "get": {
+        "summary": "List session names",
+        "tags": [
+          "Sessions"
+        ],
+        "responses": {
+          "200": {
+            "description": "A JSON array of session names.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{name}": {
+      "get": {
+        "summary": "Get a session's history",
+        "tags": [
+          "Sessions"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session details and history."
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create or update a named session",
+        "tags": [
+          "Sessions"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ChatMessage"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session created/updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a session",
+        "tags": [
+          "Sessions"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session deleted successfully."
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/sessions/exists/{name}": {
+      "get": {
+        "summary": "Check if a session exists",
+        "tags": [
+          "Sessions"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns true or false."
+          }
+        }
+      }
+    },
+    "/sessions/rename/{oldName}/{newName}": {
+      "put": {
+        "summary": "Rename a session",
+        "tags": [
+          "Sessions"
+        ],
+        "parameters": [
+          {
+            "name": "oldName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session renamed successfully."
+          }
+        }
+      }
+    },
+    "/strategies": {
+      "get": {
+        "summary": "List strategy names",
+        "tags": [
+          "Strategies"
+        ],
+        "responses": {
+          "200": {
+            "description": "A JSON array of strategy names.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChatMessage": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant",
+              "system"
+            ]
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ]
+      },
+      "ChatRequest": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            }
+          },
+          "model": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string",
+            "description": "A file path or URL to be used as context."
+          },
+          "session_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "messages"
+        ]
+      },
+      "ChatResponse": {
+        "type": "object",
+        "properties": {
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer"
+                },
+                "message": {
+                  "$ref": "#/components/schemas/ChatMessage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Pattern": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "content"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Chat",
+      "description": "Core LLM interaction endpoints."
+    },
+    {
+      "name": "Patterns",
+      "description": "Management of prompt templates."
+    },
+    {
+      "name": "Sessions",
+      "description": "Management of conversation history."
+    },
+    {
+      "name": "Contexts",
+      "description": "Management of contextual data."
+    },
+    {
+      "name": "Strategies",
+      "description": "Management of strategies."
+    },
+    {
+      "name": "Discovery",
+      "description": "Endpoints for discovering available resources."
+    },
+    {
+      "name": "Admin",
+      "description": "Server administration endpoints."
+    }
+  ]
+}
