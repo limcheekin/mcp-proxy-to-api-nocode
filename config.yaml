@@ -14,7 +14,7 @@ access_point:
 mcps:
   - id: fabric # Service identifier
     upstream_id: 1 # Upstream service identifier (must be the same as upstream id in upstreams)
-    path: /root/.config/fabric/openapi.json # Local OpenAPI file path
+    path: /app/config/fabric/openapi.json # Local OpenAPI file path
 
 # ************************************************************** 
 # Remove the comments of the following MCP for testing

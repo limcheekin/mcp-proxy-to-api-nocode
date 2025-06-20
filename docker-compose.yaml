@@ -49,7 +49,7 @@ services:
     volumes:
       # Mount the local configuration file into the container.
       - ./config.yaml:/app/config/config.yaml
-      - ./config/fabric:/root/.config/fabric
+      - ./config/fabric:/app/config/fabric
       # Remove the following comment for testing
       # - ./config/jsonplaceholder:/app/config/jsonplaceholder
     # Restart the service automatically if it fails.
