@@ -12,29 +12,46 @@ access_point:
   listeners:
     - address: 0.0.0.0:8080 # listen on all interfaces
 mcps:
-  - id: jsonplaceholder # Service identifier
+  - id: fabric # Service identifier
     upstream_id: 1 # Upstream service identifier (must be the same as upstream id in upstreams)
-    path: /app/config/jsonplaceholder/swagger.json # Local OpenAPI file path
-    upstream: # Upstream service configuration must be defined
-      headers: # Headers to send to upstream service
-        X-API-Key: "12345-abcdef"        # API key
-        Authorization: "Bearer token123" # Bearer token
-        User-Agent: "MyApp/1.0"          # User agent
-        Accept: "application/json"       # Accept header
+    path: /root/.config/fabric/openapi.json # Local OpenAPI file path
+
+# ************************************************************** 
+# Remove the comments of the following MCP for testing
+# **************************************************************
+#  - id: jsonplaceholder # Service identifier
+#    upstream_id: 9 # Upstream service identifier (must be the same as upstream id in upstreams)
+#    path: /app/config/jsonplaceholder/swagger.json # Local OpenAPI file path
+#    upstream: # Upstream service configuration must be defined
+#      headers: # Headers to send to upstream service
+#        X-API-Key: "12345-abcdef"        # API key
+#        Authorization: "Bearer token123" # Bearer token
+#        User-Agent: "MyApp/1.0"          # User agent
+#        Accept: "application/json"       # Accept header
 
 upstreams: # Upstream service configuration must be defined
   - id: 1
     headers: # Headers to send to upstream service
-      X-API-Key: "12345-abcdef"        # API key
-      Authorization: "Bearer token123" # Bearer token
-      User-Agent: "MyApp/1.0"          # User agent
-      Accept: "application/json"       # Accept header
+      X-API-Key: "your_fabric_key_here"        # API key
     nodes: #（e.g., a web server or API server)）
-      "jsonplaceholder.typicode.com": 1 # address with weight
+      "fabric:8080": 1 # address with weight
     type: roundrobin # Load balancing algorithm (roundrobin, random, ip_hash)
-    scheme: https # supports http and https
-    pass_host: rewrite # set to rewrite to upstream_host, when nodes are domains
-    upstream_host: jsonplaceholder.typicode.com # set to override host header
+
+# ************************************************************** 
+# Remove the comments of the following MCP for testing
+# **************************************************************
+#  - id: 9
+#    headers: # Headers to send to upstream service
+#      X-API-Key: "12345-abcdef"        # API key
+#      Authorization: "Bearer token123" # Bearer token
+#      User-Agent: "MyApp/1.0"          # User agent
+#      Accept: "application/json"       # Accept header
+#    nodes: #（e.g., a web server or API server)）
+#      "jsonplaceholder.typicode.com": 1 # address with weight
+#    type: roundrobin # Load balancing algorithm (roundrobin, random, ip_hash)
+#    scheme: https # supports http and https
+#    pass_host: rewrite # set to rewrite to upstream_host, when nodes are domains
+#    upstream_host: jsonplaceholder.typicode.com # set to override host header
 
 # Global rules apply plugins to all matching requests
 # global_rules:

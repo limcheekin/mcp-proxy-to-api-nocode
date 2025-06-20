@@ -1,7 +1,39 @@
+# This Docker Compose file deploys the Fabric Main REST API and a related MCP service.
+# It builds the Fabric image and MCP Access Point image from the Dockerfile of the GitHub repository.
+#
 # To use this file:
-# 1. Ensure you have an 'config.yaml' file in this directory for the mcp-access-point service.
-# 2. Run 'docker-compose up -d' to start all services.
+# 1. Replace the placeholder values like 'your_fabric_key_here' with your actual API keys for the fabric REST API.
+#    Alternatively, you can set these environment variables in your shell before running compose.
+# 2. Ensure you have an 'config.yaml' file in this directory for the mcp-access-point service.
+# 3. Run 'docker-compose up -d' to start all services.
 services:
+  fabric:
+    # Build the Docker image from the Dockerfile of the repo.
+    build: 
+      context: https://github.com/limcheekin/fabric.git#docker
+    # Name the container for easier identification.
+    container_name: fabric
+    # The command to execute when the container starts.
+    # '--serve' starts the REST API server.
+    # '--api-key' secures the API. It reads the value from the environment.
+    command: ["--serve", "--api-key", "${FABRIC_API_KEY}"]
+    ports:
+      # Map port 9991 on the host to port 8080 in the container,
+      # exposing the REST API.
+      - "9991:8080"
+    # The syntax `${VAR:-default}` uses the host's environment variable if set,
+    # otherwise it falls back to the default value.
+    environment:
+      - 'FABRIC_API_KEY=${FABRIC_API_KEY:-your_fabric_key_here}'      
+    # Mount volumes to persist data outside the container.
+    # This ensures that your patterns, contexts, and sessions are not lost
+    # when the container is recreated.
+    volumes:
+      # The config directory is mounted to make the main configs persistent.
+      - ./config/fabric:/root/.config/fabric
+    # Restart the service automatically if it fails.
+    restart: unless-stopped
+
   mcp-access-point:
     # Build the Docker image from the Dockerfile of the repo.
     build: 
@@ -17,6 +49,8 @@ services:
     volumes:
       # Mount the local configuration file into the container.
       - ./config.yaml:/app/config/config.yaml
-      - ./config/jsonplaceholder:/app/config/jsonplaceholder
+      - ./config/fabric:/root/.config/fabric
+      # Remove the following comment for testing
+      # - ./config/jsonplaceholder:/app/config/jsonplaceholder
     # Restart the service automatically if it fails.
     restart: unless-stopped
